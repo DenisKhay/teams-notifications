@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 # Ensure daemon is running, then launch Teams with extension
-systemctl --user restart teams-notifications 2>/dev/null || true
-exec google-chrome --app=https://teams.microsoft.com \
-    --load-extension="$(dirname "$(dirname "$0")")/chrome-extension"
+PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+
+systemctl --user restart teams-notifications
+sleep 1
+
+google-chrome --app=https://teams.microsoft.com \
+    --load-extension="$PROJECT_DIR/chrome-extension" &
