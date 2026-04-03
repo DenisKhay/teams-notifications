@@ -52,7 +52,7 @@ sudo pacman -S python libnotify xdotool
 ## Installation
 
 ```bash
-git clone https://github.com/pinkynrg/teams-notifications.git
+git clone https://github.com/DenisKhay/teams-notifications.git
 cd teams-notifications
 ./scripts/install.sh
 ```
