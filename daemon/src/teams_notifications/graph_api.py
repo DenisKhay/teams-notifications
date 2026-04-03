@@ -95,6 +95,8 @@ class GraphClient:
 
     def _get_msal_app(self) -> msal.PublicClientApplication:
         if self._app is None:
+            if not self._config.client_id or not self._config.tenant_id:
+                raise RuntimeError("Graph API not configured. Set client_id and tenant_id in settings.")
             self._app = msal.PublicClientApplication(
                 client_id=self._config.client_id,
                 authority=f"https://login.microsoftonline.com/{self._config.tenant_id}",
