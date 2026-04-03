@@ -209,19 +209,12 @@ class App:
             if self._watchdog.should_alert:
                 self._watchdog_reminder.start(now)
                 if self._watchdog_reminder.should_remind(now):
-                    urgency = self._watchdog_reminder.get_urgency()
-                    timeout = self._watchdog_reminder.get_timeout_ms()
-                    tier = self._watchdog_reminder.current_tier
-                    sound = (
-                        self._config.sound_file
-                        if tier.value == "sound" else None
-                    )
                     send_notification(Notification(
                         title="Teams is not running!",
-                        body="Microsoft Teams PWA is not detected.",
-                        urgency=urgency,
-                        timeout_ms=timeout,
-                        sound_file=sound,
+                        body="Microsoft Teams PWA is not detected. Please open Teams.",
+                        urgency=Urgency.CRITICAL,
+                        timeout_ms=0,
+                        sound_file=self._config.escalation_sound_file,
                     ))
                     self._watchdog_reminder.fire_reminder(now)
             else:
