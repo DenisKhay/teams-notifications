@@ -37,13 +37,17 @@ class Config:
     client_id: str = ""
     tenant_id: str = ""
 
+    # Maps config day names to weekday() integers (Monday=0, Sunday=6)
+    _DAY_MAP = {"mon": 0, "tue": 1, "wed": 2, "thu": 3, "fri": 4, "sat": 5, "sun": 6}
+
     def is_working_hours(self) -> bool:
         if not self.schedule_enabled:
             return True  # schedule disabled = always active
         from datetime import datetime
         now = datetime.now()
-        day_name = now.strftime("%a").lower()
-        if day_name not in self.schedule_days:
+        day_num = now.weekday()  # 0=Monday, 6=Sunday — locale-independent
+        day_nums = {self._DAY_MAP[d] for d in self.schedule_days if d in self._DAY_MAP}
+        if day_num not in day_nums:
             return False
         current_minutes = now.hour * 60 + now.minute
         start_minutes = self.schedule_start_hour * 60 + self.schedule_start_minute

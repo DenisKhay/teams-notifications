@@ -203,8 +203,12 @@ class TrayManager:
         self._tray.setContextMenu(self._menu)
 
     def update(self, state: UnreadState, teams_running: bool = True, working_hours: bool = True) -> None:
+        import logging
+        log = logging.getLogger(__name__)
         self._current_state = state
         self._unread_count = state.total_unread
+        log.debug("tray.update: working_hours=%s, teams_running=%s, empty=%s",
+                  working_hours, teams_running, state.is_empty)
 
         if not working_hours:
             self._state = TrayState.OFF_HOURS
