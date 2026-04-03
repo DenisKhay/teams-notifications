@@ -165,34 +165,40 @@ class TrayManager:
         self._tray.setVisible(True)
         self._tray.activated.connect(self._on_activated)
 
-        menu = QMenu()
-        action_open = QAction("Open Teams")
+        self._menu = QMenu()
+        self._actions = []
+
+        action_open = QAction("Open Teams", self._menu)
         action_open.triggered.connect(
             lambda: webbrowser.open("https://teams.microsoft.com")
         )
-        menu.addAction(action_open)
-        menu.addSeparator()
+        self._menu.addAction(action_open)
+        self._actions.append(action_open)
+        self._menu.addSeparator()
 
         for label, seconds in [
             ("Snooze 15 min", 900),
             ("Snooze 30 min", 1800),
             ("Snooze 1 hour", 3600),
         ]:
-            action = QAction(label)
+            action = QAction(label, self._menu)
             action.triggered.connect(
                 lambda checked, s=seconds: on_snooze(s)
             )
-            menu.addAction(action)
+            self._menu.addAction(action)
+            self._actions.append(action)
 
-        menu.addSeparator()
-        action_settings = QAction("Settings...")
+        self._menu.addSeparator()
+        action_settings = QAction("Settings...", self._menu)
         action_settings.triggered.connect(on_settings)
-        menu.addAction(action_settings)
-        menu.addSeparator()
-        action_quit = QAction("Quit")
+        self._menu.addAction(action_settings)
+        self._actions.append(action_settings)
+        self._menu.addSeparator()
+        action_quit = QAction("Quit", self._menu)
         action_quit.triggered.connect(on_quit)
-        menu.addAction(action_quit)
-        self._tray.setContextMenu(menu)
+        self._menu.addAction(action_quit)
+        self._actions.append(action_quit)
+        self._tray.setContextMenu(self._menu)
 
     def update(self, state: UnreadState, teams_running: bool = True) -> None:
         self._current_state = state
