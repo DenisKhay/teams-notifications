@@ -7,7 +7,7 @@ PartOf=graphical-session.target
 Type=simple
 ExecStart=%h/Projects/teams-notifications/daemon/.venv/bin/python -m teams_notifications.main
 WorkingDirectory=%h/Projects/teams-notifications/daemon
-Restart=on-failure
+Restart=always
 RestartSec=5
 Environment=QT_QPA_PLATFORM=xcb
 PassEnvironment=DISPLAY XAUTHORITY DBUS_SESSION_BUS_ADDRESS XDG_RUNTIME_DIR
