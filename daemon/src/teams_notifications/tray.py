@@ -22,6 +22,7 @@ class TrayState(Enum):
     OK = "ok"
     UNREAD = "unread"
     TEAMS_DOWN = "teams_down"
+    OFF_HOURS = "off_hours"
     ERROR = "error"
 
 
@@ -29,6 +30,7 @@ STATE_COLORS = {
     TrayState.OK: QColor(34, 197, 94),
     TrayState.UNREAD: QColor(239, 68, 68),
     TrayState.TEAMS_DOWN: QColor(234, 179, 8),
+    TrayState.OFF_HOURS: QColor(120, 120, 120),
     TrayState.ERROR: QColor(156, 163, 175),
 }
 
@@ -200,11 +202,14 @@ class TrayManager:
         self._actions.append(action_quit)
         self._tray.setContextMenu(self._menu)
 
-    def update(self, state: UnreadState, teams_running: bool = True) -> None:
+    def update(self, state: UnreadState, teams_running: bool = True, working_hours: bool = True) -> None:
         self._current_state = state
         self._unread_count = state.total_unread
 
-        if not teams_running:
+        if not working_hours:
+            self._state = TrayState.OFF_HOURS
+            self._tray.setToolTip("Teams Notifications — Outside working hours")
+        elif not teams_running:
             self._state = TrayState.TEAMS_DOWN
             self._tray.setToolTip("Teams Notifications — Teams is not running!")
         elif state.is_empty:

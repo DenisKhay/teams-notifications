@@ -19,6 +19,14 @@ class Config:
     escalation_tier3_after: int = 6
     sound_file: str = "/usr/share/sounds/Oxygen-Im-Message-In.ogg"
     escalation_sound_file: str = "/usr/share/sounds/freedesktop/stereo/alarm-clock-elapsed.oga"
+
+    # [schedule]
+    schedule_enabled: bool = True
+    schedule_days: list[str] = field(default_factory=lambda: ["mon", "tue", "wed", "thu", "fri"])
+    schedule_start_hour: int = 9
+    schedule_start_minute: int = 0
+    schedule_end_hour: int = 18
+    schedule_end_minute: int = 0
     filter_mode: str = "all"
     whitelist: list[str] = field(default_factory=list)
     blacklist: list[str] = field(default_factory=list)
@@ -28,6 +36,19 @@ class Config:
     max_preview_length: int = 100
     client_id: str = ""
     tenant_id: str = ""
+
+    def is_working_hours(self) -> bool:
+        if not self.schedule_enabled:
+            return True  # schedule disabled = always active
+        from datetime import datetime
+        now = datetime.now()
+        day_name = now.strftime("%a").lower()
+        if day_name not in self.schedule_days:
+            return False
+        current_minutes = now.hour * 60 + now.minute
+        start_minutes = self.schedule_start_hour * 60 + self.schedule_start_minute
+        end_minutes = self.schedule_end_hour * 60 + self.schedule_end_minute
+        return start_minutes <= current_minutes < end_minutes
 
     @classmethod
     def from_file(cls, path: Path) -> Config:
@@ -58,6 +79,12 @@ class Config:
             ("notifications", "max_preview_length"): "max_preview_length",
             ("auth", "client_id"): "client_id",
             ("auth", "tenant_id"): "tenant_id",
+            ("schedule", "enabled"): "schedule_enabled",
+            ("schedule", "days"): "schedule_days",
+            ("schedule", "start_hour"): "schedule_start_hour",
+            ("schedule", "start_minute"): "schedule_start_minute",
+            ("schedule", "end_hour"): "schedule_end_hour",
+            ("schedule", "end_minute"): "schedule_end_minute",
         }
         for (section, key), attr in mapping.items():
             if section in data and key in data[section]:
@@ -94,6 +121,14 @@ class Config:
             "[auth]",
             f'client_id = "{self.client_id}"',
             f'tenant_id = "{self.tenant_id}"',
+            "",
+            "[schedule]",
+            f"enabled = {_to_toml_bool(self.schedule_enabled)}",
+            f"days = {_to_toml_list(self.schedule_days)}",
+            f"start_hour = {self.schedule_start_hour}",
+            f"start_minute = {self.schedule_start_minute}",
+            f"end_hour = {self.schedule_end_hour}",
+            f"end_minute = {self.schedule_end_minute}",
         ]
         path.write_text("\n".join(lines) + "\n")
 

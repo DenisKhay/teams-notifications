@@ -104,10 +104,10 @@ class App:
                     last_message_time=now, last_read_time=datetime.min.replace(tzinfo=timezone.utc),
                 )
                 self._state = new_state
-                self._tray.update(self._state, self._teams_running)
+                self._tray.update(self._state, self._teams_running, self._config.is_working_hours())
             elif count == 0 and self._tray:
                 self._state = UnreadState()
-                self._tray.update(self._state, self._teams_running)
+                self._tray.update(self._state, self._teams_running, self._config.is_working_hours())
                 self._reminder.reset()
         elif msg_type == "notification":
             title = msg.get("title", "")
@@ -199,14 +199,14 @@ class App:
             log.error("Poll failed: %s", e)
 
         if self._tray:
-            self._tray.update(self._state, self._teams_running)
+            self._tray.update(self._state, self._teams_running, self._config.is_working_hours())
 
     async def _watchdog_loop(self) -> None:
         while self._running:
             self._teams_running = self._watchdog.check()
             now = datetime.now(timezone.utc)
 
-            if self._watchdog.should_alert:
+            if self._watchdog.should_alert and self._config.is_working_hours():
                 self._watchdog_reminder.start(now)
                 if self._watchdog_reminder.should_remind(now):
                     send_notification(Notification(
@@ -221,7 +221,7 @@ class App:
                 self._watchdog_reminder.reset()
 
             if self._tray:
-                self._tray.update(self._state, self._teams_running)
+                self._tray.update(self._state, self._teams_running, self._config.is_working_hours())
 
             await asyncio.sleep(self._config.watchdog_interval_sec)
 
@@ -229,7 +229,7 @@ class App:
         """Check every 30s if a reminder notification should fire."""
         while self._running:
             now = datetime.now(timezone.utc)
-            if not self._state.is_empty:
+            if not self._state.is_empty and self._config.is_working_hours():
                 self._reminder.start(now)
                 should = self._reminder.should_remind(now)
                 log.debug("Reminder check: count=%d, should=%s, snoozed=%s, last=%s",

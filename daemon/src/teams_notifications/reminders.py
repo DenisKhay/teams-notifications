@@ -26,14 +26,17 @@ class ReminderScheduler:
     def reminder_count(self) -> int:
         return self._reminder_count
 
-    @property
-    def is_snoozed(self) -> bool:
+    def is_snoozed_at(self, now: datetime) -> bool:
         if self._snooze_until is None:
             return False
-        if datetime.now(timezone.utc) >= self._snooze_until:
+        if now >= self._snooze_until:
             self._snooze_until = None
             return False
         return True
+
+    @property
+    def is_snoozed(self) -> bool:
+        return self.is_snoozed_at(datetime.now(timezone.utc))
 
     @property
     def current_tier(self) -> EscalationTier:

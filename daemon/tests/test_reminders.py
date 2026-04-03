@@ -11,10 +11,14 @@ def test_initial_state():
     assert rs.current_tier == EscalationTier.NORMAL
 
 
-def test_should_remind_after_interval():
+def test_should_remind_immediately_after_start():
     rs = ReminderScheduler(interval_sec=300, tier2_after=3, tier3_after=6)
     now = datetime(2026, 4, 3, 10, 0, tzinfo=timezone.utc)
     rs.start(now)
+    # First reminder fires immediately (last_reminder_at = now - interval)
+    assert rs.should_remind(now) is True
+    # After firing, next reminder waits for interval
+    rs.fire_reminder(now)
     assert rs.should_remind(now + timedelta(seconds=100)) is False
     assert rs.should_remind(now + timedelta(seconds=301)) is True
 
@@ -55,10 +59,12 @@ def test_snooze():
     rs = ReminderScheduler(interval_sec=300, tier2_after=3, tier3_after=6)
     now = datetime(2026, 4, 3, 10, 0, tzinfo=timezone.utc)
     rs.start(now)
-    rs.snooze(duration_sec=900, at=now + timedelta(seconds=301))
-    assert rs.is_snoozed is True
-    assert rs.should_remind(now + timedelta(seconds=602)) is False
-    assert rs.should_remind(now + timedelta(seconds=1202)) is True
+    rs.fire_reminder(now)  # fire first immediate reminder
+    snooze_at = now + timedelta(seconds=301)
+    rs.snooze(duration_sec=900, at=snooze_at)
+    assert rs.is_snoozed_at(snooze_at + timedelta(seconds=1)) is True
+    assert rs.should_remind(snooze_at + timedelta(seconds=301)) is False  # still snoozed
+    assert rs.should_remind(snooze_at + timedelta(seconds=901)) is True  # snooze expired
 
 
 def test_get_urgency():
