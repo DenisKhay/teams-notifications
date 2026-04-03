@@ -158,8 +158,8 @@ sound_file = "/usr/share/sounds/freedesktop/stereo/alarm-clock-elapsed.oga"
 
 [filters]
 mode = "all"                     # "all", "mentions_and_dms", "dms_only"
-whitelist = []                   # entries: "user:email@example.com" or "channel:ChannelName"
-blacklist = []                   # same format as whitelist
+whitelist = []                   # entries: "user:Display Name" or "channel:ChannelName"
+blacklist = []                   # same format as whitelist (uses display names — Graph API chat preview doesn't expose emails)
 exclude_bots = false
 
 [tray]
