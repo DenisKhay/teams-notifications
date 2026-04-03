@@ -69,7 +69,8 @@ cat > ~/.local/share/applications/teams-notifications.desktop << DESKTOP_EOF
 Type=Application
 Name=Microsoft Teams
 Comment=Teams with notification bridge
-Exec=$PROJECT_DIR/scripts/launch-teams.sh
+Exec=bash $PROJECT_DIR/scripts/launch-teams.sh
+Terminal=false
 Icon=$EXT_DIR/icons/icon128.png
 Categories=Network;InstantMessaging;Chat;
 StartupWMClass=teams.microsoft.com
