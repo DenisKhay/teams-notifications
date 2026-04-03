@@ -34,6 +34,7 @@ class SettingsDialog(QDialog):
         tabs.addTab(self._build_notifications_tab(), "Notifications")
         tabs.addTab(self._build_reminders_tab(), "Reminders")
         tabs.addTab(self._build_watchdog_tab(), "Watchdog")
+        tabs.addTab(self._build_schedule_tab(), "Schedule")
         tabs.addTab(self._build_about_tab(), "About")
         layout.addWidget(tabs)
 
@@ -178,6 +179,60 @@ class SettingsDialog(QDialog):
         layout.addStretch()
         return tab
 
+    def _build_schedule_tab(self) -> QWidget:
+        tab = QWidget()
+        layout = QVBoxLayout(tab)
+
+        self._chk_schedule = QCheckBox("Enable working hours schedule")
+        self._chk_schedule.setChecked(self._config.schedule_enabled)
+        layout.addWidget(self._chk_schedule)
+
+        group_hours = QGroupBox("Working Hours")
+        hours_form = QFormLayout(group_hours)
+
+        start_layout = QHBoxLayout()
+        self._spin_start_hour = QSpinBox()
+        self._spin_start_hour.setRange(0, 23)
+        self._spin_start_hour.setValue(self._config.schedule_start_hour)
+        start_layout.addWidget(self._spin_start_hour)
+        start_layout.addWidget(QLabel(":"))
+        self._spin_start_minute = QSpinBox()
+        self._spin_start_minute.setRange(0, 59)
+        self._spin_start_minute.setValue(self._config.schedule_start_minute)
+        start_layout.addWidget(self._spin_start_minute)
+        hours_form.addRow("Start:", start_layout)
+
+        end_layout = QHBoxLayout()
+        self._spin_end_hour = QSpinBox()
+        self._spin_end_hour.setRange(0, 23)
+        self._spin_end_hour.setValue(self._config.schedule_end_hour)
+        end_layout.addWidget(self._spin_end_hour)
+        end_layout.addWidget(QLabel(":"))
+        self._spin_end_minute = QSpinBox()
+        self._spin_end_minute.setRange(0, 59)
+        self._spin_end_minute.setValue(self._config.schedule_end_minute)
+        end_layout.addWidget(self._spin_end_minute)
+        hours_form.addRow("End:", end_layout)
+
+        layout.addWidget(group_hours)
+
+        group_days = QGroupBox("Working Days")
+        days_layout = QVBoxLayout(group_days)
+        self._day_checks = {}
+        for day_code, day_label in [
+            ("mon", "Monday"), ("tue", "Tuesday"), ("wed", "Wednesday"),
+            ("thu", "Thursday"), ("fri", "Friday"),
+            ("sat", "Saturday"), ("sun", "Sunday"),
+        ]:
+            chk = QCheckBox(day_label)
+            chk.setChecked(day_code in self._config.schedule_days)
+            self._day_checks[day_code] = chk
+            days_layout.addWidget(chk)
+        layout.addWidget(group_days)
+
+        layout.addStretch()
+        return tab
+
     def _build_about_tab(self) -> QWidget:
         tab = QWidget()
         layout = QVBoxLayout(tab)
@@ -238,6 +293,14 @@ class SettingsDialog(QDialog):
         self._config.watchdog_grace_checks = self._spin_grace.value()
         self._config.client_id = self._input_client_id.text().strip()
         self._config.tenant_id = self._input_tenant_id.text().strip()
+        self._config.schedule_enabled = self._chk_schedule.isChecked()
+        self._config.schedule_start_hour = self._spin_start_hour.value()
+        self._config.schedule_start_minute = self._spin_start_minute.value()
+        self._config.schedule_end_hour = self._spin_end_hour.value()
+        self._config.schedule_end_minute = self._spin_end_minute.value()
+        self._config.schedule_days = [
+            day for day, chk in self._day_checks.items() if chk.isChecked()
+        ]
 
         self.accept()
 
