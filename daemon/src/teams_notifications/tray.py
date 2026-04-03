@@ -27,10 +27,10 @@ class TrayState(Enum):
 
 
 STATE_COLORS = {
-    TrayState.OK: QColor(34, 197, 94),
-    TrayState.UNREAD: QColor(239, 68, 68),
-    TrayState.TEAMS_DOWN: QColor(234, 179, 8),
-    TrayState.OFF_HOURS: QColor(120, 120, 120),
+    TrayState.OK: QColor(0, 230, 64),           # bright green
+    TrayState.UNREAD: QColor(255, 40, 40),       # bright red
+    TrayState.TEAMS_DOWN: QColor(255, 200, 0),   # bright yellow
+    TrayState.OFF_HOURS: QColor(90, 90, 90),     # dark gray
     TrayState.ERROR: QColor(156, 163, 175),
 }
 
