@@ -36,16 +36,30 @@ class TeamsWatchdog:
             self._consecutive_misses += 1
 
     def _is_teams_running(self) -> bool:
+        # Strategy 1: Check for Chrome PWA with --app-id (installed PWA)
         try:
             result = subprocess.run(
                 ["pgrep", "-a", "-f", "chrome.*--app-id="],
                 capture_output=True,
                 timeout=5,
             )
-            if result.returncode != 0:
-                return False
-            output = result.stdout.decode("utf-8", errors="replace")
-            return any(app_id in output for app_id in TEAMS_APP_IDS)
+            if result.returncode == 0:
+                output = result.stdout.decode("utf-8", errors="replace")
+                if any(app_id in output for app_id in TEAMS_APP_IDS):
+                    return True
         except (subprocess.SubprocessError, OSError) as e:
-            log.warning("Watchdog check failed: %s", e)
-            return False
+            log.warning("Watchdog pgrep check failed: %s", e)
+
+        # Strategy 2: Check for window with "Microsoft Teams" in title (PWA as tab)
+        try:
+            result = subprocess.run(
+                ["xdotool", "search", "--name", "Microsoft Teams"],
+                capture_output=True,
+                timeout=5,
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                return True
+        except (subprocess.SubprocessError, OSError) as e:
+            log.warning("Watchdog xdotool check failed: %s", e)
+
+        return False
