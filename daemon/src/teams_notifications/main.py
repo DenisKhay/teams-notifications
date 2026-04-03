@@ -206,7 +206,7 @@ class App:
             self._teams_running = self._watchdog.check()
             now = datetime.now(timezone.utc)
 
-            if self._watchdog.should_alert and self._config.is_working_hours():
+            if self._watchdog.should_alert:
                 log.info("Teams not running — relaunching")
                 import subprocess
                 subprocess.Popen(
