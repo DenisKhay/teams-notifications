@@ -86,8 +86,29 @@ class App:
 
     async def _on_socket_message(self, msg: dict) -> None:
         msg_type = msg.get("type")
-        if msg_type == "badge":
-            log.info("Badge update from PWA: %d", msg.get("count", 0))
+        if msg_type == "ping":
+            log.debug("Ping from native host")
+        elif msg_type == "badge":
+            count = msg.get("count", 0)
+            log.info("Badge update from PWA: %d", count)
+            # Update tray with badge count from PWA
+            if count > 0 and self._tray:
+                from .state import ChatInfo
+                # Create a synthetic unread state from badge count
+                now = datetime.now(timezone.utc)
+                new_state = UnreadState(last_updated=now)
+                new_state.chats["pwa_badge"] = ChatInfo(
+                    chat_id="pwa_badge", chat_type="oneOnOne",
+                    sender_name="Teams", sender_id="",
+                    last_message=f"{count} unread message{'s' if count != 1 else ''}",
+                    last_message_time=now, last_read_time=datetime.min.replace(tzinfo=timezone.utc),
+                )
+                self._state = new_state
+                self._tray.update(self._state, self._teams_running)
+            elif count == 0 and self._tray:
+                self._state = UnreadState()
+                self._tray.update(self._state, self._teams_running)
+                self._reminder.reset()
         elif msg_type == "notification":
             title = msg.get("title", "")
             body = msg.get("body", "")

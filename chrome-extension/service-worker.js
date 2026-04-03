@@ -22,6 +22,8 @@ function connectNative() {
       setTimeout(connectNative, 5000);
     });
 
+    // Send handshake so native host stays alive
+    port.postMessage({ type: 'ping', timestamp: Math.floor(Date.now() / 1000) });
     console.log('[Teams Notifications] Connected to native host');
   } catch (e) {
     console.error('[Teams Notifications] Failed to connect:', e);
@@ -57,7 +59,10 @@ connectNative();
 chrome.alarms.create('keepalive', { periodInMinutes: 1 });
 chrome.alarms.onAlarm.addListener(function(alarm) {
   if (alarm.name === 'keepalive') {
-    // Just keeps the service worker from going idle
+    // Keep native host connection alive too
+    if (port) {
+      try { port.postMessage({ type: 'ping', timestamp: Math.floor(Date.now() / 1000) }); } catch (e) { /* ignore */ }
+    }
     console.log('[Teams Notifications] Keepalive ping');
   }
 });

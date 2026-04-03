@@ -3,7 +3,7 @@
   "name": "Teams Notifications Bridge",
   "version": "1.0.0",
   "description": "Bridges Microsoft Teams PWA notifications to the system tray daemon",
-  "permissions": ["nativeMessaging"],
+  "permissions": ["nativeMessaging", "alarms"],
   "background": {
     "service_worker": "service-worker.js"
   },
