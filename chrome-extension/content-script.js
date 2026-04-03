@@ -112,24 +112,23 @@
   }
   observeTitle();
 
-  // 5. Check initial title for existing unread count on page load
-  function checkInitialTitle() {
+  // 5. Poll document title every 30s for unread count
+  function checkTitle() {
     var match = document.title.match(/^\((\d+)\)/);
-    if (match) {
-      sendEvent({
-        type: 'badge',
-        count: parseInt(match[1], 10),
-        timestamp: Math.floor(Date.now() / 1000)
-      });
-    }
-  }
-  if (document.readyState === 'complete') {
-    setTimeout(checkInitialTitle, 3000); // delay to let Teams settle
-  } else {
-    window.addEventListener('load', function() {
-      setTimeout(checkInitialTitle, 3000);
+    sendEvent({
+      type: 'badge',
+      count: match ? parseInt(match[1], 10) : 0,
+      timestamp: Math.floor(Date.now() / 1000)
     });
   }
+  if (document.readyState === 'complete') {
+    setTimeout(checkTitle, 3000);
+  } else {
+    window.addEventListener('load', function() {
+      setTimeout(checkTitle, 3000);
+    });
+  }
+  setInterval(checkTitle, 30000);
 
   console.log('[Teams Notifications Bridge] Content script loaded — intercepting badges and notifications');
 })();
