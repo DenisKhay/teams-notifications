@@ -243,11 +243,19 @@ class App:
                           self._state.total_unread, should,
                           self._reminder.is_snoozed, self._reminder._last_reminder_at)
                 if should:
-                    log.info("Firing reminder notification: %s", self._state.summary())
+                    tier = self._reminder.current_tier
+                    sound = (
+                        self._config.escalation_sound_file
+                        if tier.value == "sound"
+                        else self._config.sound_file
+                    )
+                    log.info("Firing reminder notification: %s (tier=%s)", self._state.summary(), tier.value)
                     send_notification(Notification(
                         title="Teams — Unread Messages",
                         body=self._state.summary(),
-                        sound_file=self._config.sound_file,
+                        urgency=self._reminder.get_urgency(),
+                        timeout_ms=self._reminder.get_timeout_ms(),
+                        sound_file=sound,
                     ))
                     self._reminder.fire_reminder(now)
             else:

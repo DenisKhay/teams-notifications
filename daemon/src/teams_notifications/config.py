@@ -17,7 +17,8 @@ class Config:
     escalation_enabled: bool = True
     escalation_tier2_after: int = 3
     escalation_tier3_after: int = 6
-    sound_file: str = "/usr/share/sounds/freedesktop/stereo/alarm-clock-elapsed.oga"
+    sound_file: str = "/usr/share/sounds/Oxygen-Im-Message-In.ogg"
+    escalation_sound_file: str = "/usr/share/sounds/freedesktop/stereo/alarm-clock-elapsed.oga"
     filter_mode: str = "all"
     whitelist: list[str] = field(default_factory=list)
     blacklist: list[str] = field(default_factory=list)
