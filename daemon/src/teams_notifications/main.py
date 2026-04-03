@@ -232,6 +232,32 @@ class App:
 
             await asyncio.sleep(self._config.watchdog_interval_sec)
 
+    async def _reminder_loop(self) -> None:
+        """Check every 30s if a reminder notification should fire."""
+        while self._running:
+            now = datetime.now(timezone.utc)
+            if not self._state.is_empty:
+                self._reminder.start(now)
+                if self._reminder.should_remind(now):
+                    urgency = self._reminder.get_urgency()
+                    timeout = self._reminder.get_timeout_ms()
+                    tier = self._reminder.current_tier
+                    sound = (
+                        self._config.sound_file
+                        if tier.value == "sound" else None
+                    )
+                    send_notification(Notification(
+                        title="Teams — Unread Messages",
+                        body=self._state.summary(),
+                        urgency=urgency,
+                        timeout_ms=timeout,
+                        sound_file=sound,
+                    ))
+                    self._reminder.fire_reminder(now)
+            else:
+                self._reminder.reset()
+            await asyncio.sleep(30)
+
     async def run_async(self) -> None:
         self._running = True
         socket_server = SocketServer(on_message=self._on_socket_message)
@@ -240,6 +266,7 @@ class App:
             await asyncio.gather(
                 self._poll_loop(),
                 self._watchdog_loop(),
+                self._reminder_loop(),
             )
         finally:
             await socket_server.stop()

@@ -173,17 +173,16 @@ class TrayManager:
         menu.addAction(action_open)
         menu.addSeparator()
 
-        snooze_menu = menu.addMenu("Snooze")
         for label, seconds in [
-            ("15 minutes", 900),
-            ("30 minutes", 1800),
-            ("1 hour", 3600),
+            ("Snooze 15 min", 900),
+            ("Snooze 30 min", 1800),
+            ("Snooze 1 hour", 3600),
         ]:
             action = QAction(label)
             action.triggered.connect(
                 lambda checked, s=seconds: on_snooze(s)
             )
-            snooze_menu.addAction(action)
+            menu.addAction(action)
 
         menu.addSeparator()
         action_settings = QAction("Settings...")
