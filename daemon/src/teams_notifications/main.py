@@ -207,16 +207,19 @@ class App:
             now = datetime.now(timezone.utc)
 
             if self._watchdog.should_alert and self._config.is_working_hours():
-                self._watchdog_reminder.start(now)
-                if self._watchdog_reminder.should_remind(now):
-                    send_notification(Notification(
-                        title="Teams is not running!",
-                        body="Microsoft Teams PWA is not detected. Please open Teams.",
-                        urgency=Urgency.CRITICAL,
-                        timeout_ms=0,
-                        sound_file=self._config.escalation_sound_file,
-                    ))
-                    self._watchdog_reminder.fire_reminder(now)
+                log.info("Teams not running — relaunching")
+                import subprocess
+                subprocess.Popen(
+                    ["google-chrome", "--app=https://teams.microsoft.com"],
+                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                )
+                send_notification(Notification(
+                    title="Teams Notifications",
+                    body="Teams was closed — relaunching.",
+                    sound_file=self._config.sound_file,
+                ))
+                # Reset watchdog so we don't spam relaunch
+                self._watchdog._consecutive_misses = 0
             else:
                 self._watchdog_reminder.reset()
 
