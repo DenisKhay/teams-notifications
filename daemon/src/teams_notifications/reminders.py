@@ -46,7 +46,8 @@ class ReminderScheduler:
     def start(self, at: datetime) -> None:
         if self._started_at is None:
             self._started_at = at
-            self._last_reminder_at = at
+            # Set last_reminder_at far enough back so first reminder fires immediately
+            self._last_reminder_at = at - self._interval
 
     def should_remind(self, now: datetime) -> bool:
         if self._last_reminder_at is None:

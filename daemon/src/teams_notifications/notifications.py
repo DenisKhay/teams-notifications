@@ -36,11 +36,13 @@ def send_notification(notification: Notification) -> None:
         notification.body,
     ]
     try:
-        subprocess.run(cmd, check=True, capture_output=True, timeout=5)
+        result = subprocess.run(cmd, check=True, capture_output=True, timeout=5)
+        log.debug("notify-send OK: %s", notification.title)
     except FileNotFoundError:
         log.error("notify-send not found. Install libnotify-bin.")
     except subprocess.SubprocessError as e:
-        log.error("Failed to send notification: %s", e)
+        log.error("Failed to send notification: %s, stderr: %s", e,
+                  getattr(e, 'stderr', b'').decode('utf-8', errors='replace'))
 
     if notification.sound_file:
         _play_sound(notification.sound_file)

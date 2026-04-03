@@ -238,20 +238,16 @@ class App:
             now = datetime.now(timezone.utc)
             if not self._state.is_empty:
                 self._reminder.start(now)
-                if self._reminder.should_remind(now):
-                    urgency = self._reminder.get_urgency()
-                    timeout = self._reminder.get_timeout_ms()
-                    tier = self._reminder.current_tier
-                    sound = (
-                        self._config.sound_file
-                        if tier.value == "sound" else None
-                    )
+                should = self._reminder.should_remind(now)
+                log.debug("Reminder check: count=%d, should=%s, snoozed=%s, last=%s",
+                          self._state.total_unread, should,
+                          self._reminder.is_snoozed, self._reminder._last_reminder_at)
+                if should:
+                    log.info("Firing reminder notification: %s", self._state.summary())
                     send_notification(Notification(
                         title="Teams — Unread Messages",
                         body=self._state.summary(),
-                        urgency=urgency,
-                        timeout_ms=timeout,
-                        sound_file=sound,
+                        sound_file=self._config.sound_file,
                     ))
                     self._reminder.fire_reminder(now)
             else:
@@ -278,7 +274,7 @@ class App:
 
 def main():
     logging.basicConfig(
-        level=logging.INFO,
+        level=logging.DEBUG,
         format="%(asctime)s %(name)s %(levelname)s %(message)s",
     )
 
