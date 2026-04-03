@@ -3,5 +3,5 @@
   "description": "Teams Notifications native messaging host",
   "path": "/home/denisk/Projects/teams-notifications/scripts/native-host.sh",
   "type": "stdio",
-  "allowed_origins": []
+  "allowed_origins": ["chrome-extension://bjmpjhfbepbckdfoalihmgknlmfgdmno/"]
 }
